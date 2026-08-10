@@ -113,8 +113,8 @@ clean:
 	rm -fr ${DIR_BUILD}
 	rm -f .gdbinit
 
-# try to generate a unique GDB port
-GDBPORT = $(shell expr `id -u` % 5000 + 25000)
+# fixed GDB port matching .vscode/launch.json
+GDBPORT = 26000
 
 QEMUGDB = $(shell if ${QEMU} -help | grep -q '^-gdb'; \
 	then echo "-gdb tcp::${GDBPORT}"; \
