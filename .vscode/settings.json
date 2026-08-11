@@ -5,4 +5,5 @@
           "args": ["-mingw64", "-defterm", "-here", "-no-start", "-use-full-path"]
         }
     },
+    "makefile.configureOnOpen": false,
 }
