@@ -6,12 +6,12 @@ TCB* TCB::running = nullptr;
 
 uint64 TCB::timeSliceCounter = 0;
 
-TCB* TCB::createThread(Body body, void *arg) {
-    return new TCB(body, arg, TIME_SLICE);
+TCB* TCB::createThread(Body body, void *arg, uint64* stackSpace) {
+    return new TCB(body, arg, stackSpace, TIME_SLICE);
 }
 
 void TCB::yield() {
-    __asm__ volatile ("ecall");
+    __asm__ volatile ("li a0, 0x13; ecall" : : : "a0");
 }
 
 void TCB::dispatch() {

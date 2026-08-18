@@ -9,7 +9,7 @@ public:
     ~TCB() { delete[] stack; }
 
     using Body = void (*)(void*);
-    static TCB* createThread(Body body, void *arg);
+    static TCB* createThread(Body body, void *arg, uint64* stackSpace);
 
     static void yield();
 
@@ -21,10 +21,10 @@ public:
 
     static TCB *running;
 private:
-    TCB(Body body, void *arg, uint64 timeSlice) : 
+    TCB(Body body, void *arg, uint64* stackSpace, uint64 timeSlice) : 
             body(body), 
             arg(arg),
-            stack(body != nullptr ? new uint64[STACK_SIZE] : nullptr), 
+            stack(stackSpace), 
             context({
                 (uint64)&threadWrapper,
                 stack != nullptr ? (uint64)&stack[STACK_SIZE] : 0

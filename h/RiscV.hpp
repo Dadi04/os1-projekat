@@ -5,6 +5,25 @@
 
 class RiscV {
 public:
+    enum ABI_Register {
+        A0 = 10, A1 = 11, A2 = 12, A3 = 13, A4 = 14, A5 = 15, A6 = 16, A7 = 17
+    };
+
+    enum TrapCause {
+        ECALL_USER = 0x0000000000000008UL,
+        ECALL_SUPERVISOR = 0x0000000000000009UL,
+        TIMER_INTERRUPT = 0x8000000000000001UL,
+        CONSOLE_INTERRUPT = 0x8000000000000009UL
+    };
+
+    enum SyscallCode {
+        MEM_ALLOC = 0x01,
+        MEM_FREE = 0x02,
+        THREAD_CREATE = 0x11,
+        THREAD_EXIT = 0x12,
+        THREAD_DISPATCH = 0x13,
+    };
+
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)
     static void popSppSpie();
 
@@ -74,7 +93,7 @@ public:
 private:
 
     // supervisor trap handler
-    static void handleSupervisorTrap();
+    static void handleSupervisorTrap(uint64 *savedRegs);
 
 };
 
