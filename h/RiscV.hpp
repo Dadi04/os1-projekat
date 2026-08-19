@@ -27,7 +27,10 @@ public:
         SEM_WAIT = 0x23,
         SEM_SIGNAL = 0x24,
         SEM_WAIT_N = 0x25,
-        SEM_SIGNAL_N = 0x26
+        SEM_SIGNAL_N = 0x26,
+        TIME_SLEEP = 0x31,
+        GETC = 0x41,
+        PUTC = 0x42
     };
 
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)

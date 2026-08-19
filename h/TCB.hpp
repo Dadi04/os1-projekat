@@ -3,10 +3,11 @@
 
 #include "../lib/hw.h"
 #include "Scheduler.hpp"
+#include "MemoryAllocator.hpp"
 
 class TCB {
 public:
-    ~TCB() { delete[] stack; }
+    ~TCB() { if (stack != nullptr) MemoryAllocator::free(stack); }
 
     using Body = void (*)(void*);
     static TCB* createThread(Body body, void *arg, uint64* stackSpace);
@@ -21,6 +22,9 @@ public:
 
     static void block();
     static void unblock(TCB *thread);
+
+    void* operator new(size_t size) { return MemoryAllocator::alloc(size); }
+    void operator delete(void* ptr) { MemoryAllocator::free(ptr); }
 
     static TCB *running;
 private:
@@ -59,7 +63,7 @@ private:
     static uint64 timeSliceCounter;
 
     static uint64 constexpr STACK_SIZE = DEFAULT_STACK_SIZE / sizeof(uint64);
-    static uint64 constexpr TIME_SLICE = 2;
+    static uint64 constexpr TIME_SLICE = DEFAULT_TIME_SLICE;
 };
 
 #endif

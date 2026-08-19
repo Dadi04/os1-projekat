@@ -74,18 +74,18 @@ LDLIBS   = --library-path . $(patsubst %,--library=:%,${LIBS})
 
 OBJECTS =
 
-# SOURCES_ASM = $(shell find . -name "*.S" -printf "%P ")
-SOURCES_ASM = $(shell find . -name "*.S" -not -path "./test/*" -printf "%P ")
+SOURCES_ASM = $(shell find . -name "*.S" -printf "%P ")
+# SOURCES_ASM = $(shell find . -name "*.S" -not -path "./test/*" -printf "%P ")
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES_ASM:.S=.o})
 vpath %.S $(sort $(dir ${SOURCES_ASM}))
 
-# SOURCES = $(shell find . -name "*.c" -printf "%P ")
-SOURCES = $(shell find . -name "*.c" -not -path "./test/*" -printf "%P ")
+SOURCES = $(shell find . -name "*.c" -printf "%P ")
+# SOURCES = $(shell find . -name "*.c" -not -path "./test/*" -printf "%P ")
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES:.c=.o})
 vpath %.c $(sort $(dir ${SOURCES}))
 
-# SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P ")
-SOURCES_CPP = $(shell find . -name "*.cpp" -not -path "./test/*" -printf "%P ")
+SOURCES_CPP = $(shell find . -name "*.cpp" -printf "%P ")
+# SOURCES_CPP = $(shell find . -name "*.cpp" -not -path "./test/*" -printf "%P ")
 OBJECTS += $(addprefix ${DIR_BUILD}/,${SOURCES_CPP:.cpp=.o})
 vpath %.cpp $(sort $(dir ${SOURCES_CPP}))
 

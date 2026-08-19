@@ -1,7 +1,9 @@
 #include "../h/RiscV.hpp"
 #include "../h/TCB.hpp"
 #include "../h/MemoryAllocator.hpp"
-#include "../h/Semaphore.hpp"
+#include "../h/_sem.hpp"
+
+#include "../lib/console.h" // temp
 
 void RiscV::popSppSpie() {
     __asm__ volatile ("csrw sepc, ra");
@@ -52,38 +54,53 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
                 TCB::dispatch();
                 break;
             case SEM_OPEN: {
-                Semaphore** handle = (Semaphore**)a1;
+                _sem** handle = (_sem**)a1;
                 unsigned init = (unsigned)a2;
-                *handle = new Semaphore(init);
+                *handle = new _sem(init);
                 savedRegs[A0] = (*handle != nullptr) ? 0 : (uint64)-1;
                 break;
             }
             case SEM_CLOSE: {
-                Semaphore* sem = (Semaphore*)a1;
+                _sem* sem = (_sem*)a1;
                 savedRegs[A0] = sem->close();
                 delete sem;
                 break;
             }
             case SEM_WAIT: {
-                Semaphore* sem = (Semaphore*)a1;
+                _sem* sem = (_sem*)a1;
                 savedRegs[A0] = sem->wait();
                 break;
             }
             case SEM_SIGNAL: {
-                Semaphore* sem = (Semaphore*)a1;
+                _sem* sem = (_sem*)a1;
                 savedRegs[A0] = sem->signal();
                 break;
             }
             case SEM_WAIT_N: {
-                Semaphore* sem = (Semaphore*)a1;
+                _sem* sem = (_sem*)a1;
                 unsigned n = (unsigned)a2;
                 savedRegs[A0] = sem->waitN(n);
                 break;
             }
             case SEM_SIGNAL_N: {
-                Semaphore* sem = (Semaphore*)a1;
+                _sem* sem = (_sem*)a1;
                 unsigned n = (unsigned)a2;
                 savedRegs[A0] = sem->signalN(n);
+                break;
+            }
+            case TIME_SLEEP: {
+
+                break;
+            }
+            case GETC: { // temp
+                // static int call = 0;
+                // if (call == 0) savedRegs[A0] = '2';
+                // else savedRegs[A0] = '\n';
+                // call++;
+                break;
+            }
+            case PUTC: {
+                __putc((char)a1); // temp
                 break;
             }
             default:
@@ -105,6 +122,7 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         }
     } else if (scause == CONSOLE_INTERRUPT) {
         // interrupt: yes, cause code: supervisor external interrupt (console)
+        console_handler(); // temp
     } else {
         // unexpected trap cause
     }

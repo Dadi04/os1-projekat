@@ -1,6 +1,8 @@
 #ifndef _LIST_HPP_
 #define _LIST_HPP_
 
+#include "MemoryAllocator.hpp"
+
 template<typename T>
 class List { 
 public:
@@ -22,6 +24,9 @@ public:
     }
 
     bool isEmpty() const { return head == nullptr; }
+
+    void* operator new(size_t size) { return MemoryAllocator::alloc(size); }
+    void operator delete(void* ptr) { MemoryAllocator::free(ptr); }
 private:
     struct Node {
         T* data;

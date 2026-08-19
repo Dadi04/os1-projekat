@@ -1,8 +1,8 @@
-#include "../h/Semaphore.hpp"
+#include "../h/_sem.hpp"
 #include "../h/TCB.hpp"
 #include "../h/Scheduler.hpp"
 
-int Semaphore::wait() {
+int _sem::wait() {
     if (closed) return -1;
 
     val--;
@@ -14,7 +14,7 @@ int Semaphore::wait() {
     return 0;
 }
 
-int Semaphore::signal() {
+int _sem::signal() {
     if (closed) return -1;
 
     val++;
@@ -24,7 +24,7 @@ int Semaphore::signal() {
     return 0;
 }
 
-int Semaphore::waitN(unsigned n) {
+int _sem::waitN(unsigned n) {
     if (closed) return -1;
 
     val -= (int)n;
@@ -36,7 +36,7 @@ int Semaphore::waitN(unsigned n) {
     return 0;
 }
 
-int Semaphore::signalN(unsigned n) {
+int _sem::signalN(unsigned n) {
     if (closed) return -1;
 
     for (unsigned i = 0; i < n; i++) {
@@ -49,7 +49,7 @@ int Semaphore::signalN(unsigned n) {
     return 0;
 }
 
-int Semaphore::close() {
+int _sem::close() {
     if (closed) return -1;
     closed = true;
 
@@ -59,12 +59,12 @@ int Semaphore::close() {
     return 0;
 }
 
-void Semaphore::block() {
+void _sem::block() {
     blockedQueue.addLast(TCB::running);
     TCB::block();
 }
 
-void Semaphore::unblock() {
+void _sem::unblock() {
     TCB* t = blockedQueue.removeFirst();
     TCB::unblock(t);
 }
