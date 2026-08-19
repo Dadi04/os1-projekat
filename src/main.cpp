@@ -8,6 +8,7 @@ extern void userMain();
 void main() {
     MemoryAllocator::init();
     RiscV::w_stvec((uint64)&RiscV::supervisorTrap);
+    RiscV::ms_sstatus(RiscV::SSTATUS_SIE);
 
     TCB* mainThread = TCB::createThread(nullptr, nullptr, nullptr);
     TCB::running = mainThread;

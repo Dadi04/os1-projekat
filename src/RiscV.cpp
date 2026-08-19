@@ -2,6 +2,7 @@
 #include "../h/TCB.hpp"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/_sem.hpp"
+#include "../h/SleepingQueue.hpp"
 
 #include "../lib/console.h" // temp
 
@@ -89,12 +90,17 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
                 break;
             }
             case TIME_SLEEP: {
-
+                time_t time = (time_t)a1;
+                if (time > 0) {
+                    SleepingQueue::put(TCB::running, time);
+                    TCB::block();
+                    savedRegs[A0] = 0;
+                }
                 break;
             }
             case GETC: { // temp
                 // static int call = 0;
-                // if (call == 0) savedRegs[A0] = '2';
+                // if (call == 0) savedRegs[A0] = '5';
                 // else savedRegs[A0] = '\n';
                 // call++;
                 break;
@@ -111,6 +117,7 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
     } else if (scause == TIMER_INTERRUPT) {
         // interrupt: yes, cause code: supervisor software interrupt (timer)
         mc_sip(SIP_SSIP);
+        SleepingQueue::update();
         TCB::timeSliceCounter++;
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice()) {
             uint64 sepc = r_sepc();

@@ -14,11 +14,15 @@ public:
 
     static void yield();
 
-    bool isFinished() const { return finished; };
-    void setFinished(bool finished) { TCB::finished = finished; };
+    bool isFinished() const { return finished; }
+    void setFinished(bool finished) { TCB::finished = finished; }
 
-    uint64 getTimeSlice() const { return timeSlice; };
+    uint64 getTimeSlice() const { return timeSlice; }
     void setTimeSlice(uint64 timeSlice) { TCB::timeSlice = timeSlice; }
+
+    time_t getSleepTime() const { return sleepTime; }
+    void setSleepTime(time_t sleepTime) { TCB::sleepTime = sleepTime; }
+    void decSleepTime() { TCB::sleepTime--; }
 
     static void block();
     static void unblock(TCB *thread);
@@ -37,7 +41,8 @@ private:
                 stack != nullptr ? (uint64)&stack[STACK_SIZE] : 0
             }), 
             timeSlice(timeSlice),
-            finished(false) {
+            finished(false),
+            sleepTime(0) {
         if (body != nullptr) Scheduler::put(this);
     }
     struct Context {
@@ -51,6 +56,7 @@ private:
     Context context;
     uint64 timeSlice;
     bool finished;
+    time_t sleepTime;
 
     friend class RiscV;
 

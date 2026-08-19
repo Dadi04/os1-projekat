@@ -180,6 +180,22 @@ int sem_signal_n(sem_t id, unsigned n) {
     return ret;
 }
 
+int time_sleep(time_t time) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a1, %[time]\n"
+        "li a0, 0x31\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [time] "r"(time)
+        : "a0", "a1"
+    );
+
+    return ret;
+}
+
 char getc() {
     int ret;
 
