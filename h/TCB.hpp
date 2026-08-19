@@ -19,6 +19,9 @@ public:
     uint64 getTimeSlice() const { return timeSlice; };
     void setTimeSlice(uint64 timeSlice) { TCB::timeSlice = timeSlice; }
 
+    static void block();
+    static void unblock(TCB *thread);
+
     static TCB *running;
 private:
     TCB(Body body, void *arg, uint64* stackSpace, uint64 timeSlice) : 

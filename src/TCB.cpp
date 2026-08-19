@@ -15,7 +15,7 @@ void TCB::yield() {
 }
 
 void TCB::dispatch() {
-    TCB* old = TCB::running;
+    TCB* old = running;
     if (!old->isFinished()) {
         Scheduler::put(old);
     }
@@ -29,4 +29,14 @@ void TCB::threadWrapper() {
     running->body(running->arg);
     running->setFinished(true);
     TCB::yield();
+}
+
+void TCB::block() {
+    TCB* old = running;
+    running = Scheduler::get();
+    contextSwitch(&old->context, &running->context);
+}
+
+void TCB::unblock(TCB *thread) {
+    if (thread) Scheduler::put(thread);
 }

@@ -1,7 +1,7 @@
 #include "../h/RiscV.hpp"
 #include "../h/TCB.hpp"
 #include "../h/MemoryAllocator.hpp"
-#include "../test/printing.hpp"
+#include "../h/Semaphore.hpp"
 
 void RiscV::popSppSpie() {
     __asm__ volatile ("csrw sepc, ra");
@@ -51,6 +51,41 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
                 TCB::timeSliceCounter = 0;
                 TCB::dispatch();
                 break;
+            case SEM_OPEN: {
+                Semaphore** handle = (Semaphore**)a1;
+                unsigned init = (unsigned)a2;
+                *handle = new Semaphore(init);
+                savedRegs[A0] = (*handle != nullptr) ? 0 : (uint64)-1;
+                break;
+            }
+            case SEM_CLOSE: {
+                Semaphore* sem = (Semaphore*)a1;
+                savedRegs[A0] = sem->close();
+                delete sem;
+                break;
+            }
+            case SEM_WAIT: {
+                Semaphore* sem = (Semaphore*)a1;
+                savedRegs[A0] = sem->wait();
+                break;
+            }
+            case SEM_SIGNAL: {
+                Semaphore* sem = (Semaphore*)a1;
+                savedRegs[A0] = sem->signal();
+                break;
+            }
+            case SEM_WAIT_N: {
+                Semaphore* sem = (Semaphore*)a1;
+                unsigned n = (unsigned)a2;
+                savedRegs[A0] = sem->waitN(n);
+                break;
+            }
+            case SEM_SIGNAL_N: {
+                Semaphore* sem = (Semaphore*)a1;
+                unsigned n = (unsigned)a2;
+                savedRegs[A0] = sem->signalN(n);
+                break;
+            }
             default:
                 break;
         }

@@ -81,6 +81,105 @@ void thread_dispatch() {
     );
 }
 
+int sem_open(sem_t* handle, unsigned init) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a2, %[init]\n"
+        "mv a1, %[hnd]\n"
+        "li a0, 0x21\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [hnd] "r"(handle), [init] "r"(init)
+        : "a0", "a1", "a2"
+    );
+
+    return ret;
+}
+
+int sem_close(sem_t handle) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a1, %[hnd]\n"
+        "li a0, 0x22\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [hnd] "r"(handle)
+        : "a0", "a1"
+    );
+
+    return ret;
+}
+
+int sem_wait(sem_t id) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a1, %[id]\n"
+        "li a0, 0x23\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [id] "r"(id)
+        : "a0", "a1"
+    );
+
+    return ret;
+}
+
+int sem_signal(sem_t id) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a1, %[id]\n"
+        "li a0, 0x24\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [id] "r"(id)
+        : "a0", "a1"
+    );
+
+    return ret;
+}
+
+int sem_wait_n(sem_t id, unsigned n) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a2, %[n]\n"
+        "mv a1, %[id]\n"
+        "li a0, 0x25\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [id] "r"(id), [n] "r"(n)
+        : "a0", "a1", "a2"
+    );
+
+    return ret;
+}
+
+int sem_signal_n(sem_t id, unsigned n) {
+    int ret;
+
+    __asm__ volatile (
+        "mv a2, %[n]\n"
+        "mv a1, %[id]\n"
+        "li a0, 0x26\n"
+        "ecall\n"
+        "mv %[ret], a0"
+        : [ret] "=r"(ret)
+        : [id] "r"(id), [n] "r"(n)
+        : "a0", "a1", "a2"
+    );
+
+    return ret;
+}
+
 char getc() {
     int ret;
 
