@@ -36,6 +36,9 @@ public:
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)
     static void popSppSpie();
 
+    // mask set register sie
+    static void ms_sie(uint64 mask);
+
     // read register scause
     static uint64 r_scause();
 
@@ -105,6 +108,10 @@ private:
     static void handleSupervisorTrap(uint64 *savedRegs);
 
 };
+
+inline void RiscV::ms_sie(uint64 mask) {
+    __asm__ volatile ("csrs sie, %[mask]" : : [mask] "r"(mask));
+}
 
 inline uint64 RiscV::r_scause() {
     uint64 volatile scause;

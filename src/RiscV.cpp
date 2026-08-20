@@ -3,8 +3,10 @@
 #include "../h/MemoryAllocator.hpp"
 #include "../h/_sem.hpp"
 #include "../h/SleepingQueue.hpp"
+#include "../h/BoundedBuffer.hpp"
 
-#include "../lib/console.h" // temp
+BoundedBuffer* inputBuffer = nullptr;
+BoundedBuffer* outputBuffer = nullptr;
 
 void RiscV::popSppSpie() {
     __asm__ volatile ("csrw sepc, ra");
@@ -98,15 +100,15 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
                 }
                 break;
             }
-            case GETC: { // temp
-                // static int call = 0;
-                // if (call == 0) savedRegs[A0] = '5';
-                // else savedRegs[A0] = '\n';
-                // call++;
+            case GETC: {
+                savedRegs[A0] = (uint64)inputBuffer->get();
                 break;
             }
             case PUTC: {
-                __putc((char)a1); // temp
+                char c = (char)a1;
+                while (!(*((char*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT)) {}
+                *((char*)CONSOLE_TX_DATA) = c;
+                savedRegs[A0] = 0;
                 break;
             }
             default:
@@ -129,7 +131,14 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         }
     } else if (scause == CONSOLE_INTERRUPT) {
         // interrupt: yes, cause code: supervisor external interrupt (console)
-        console_handler(); // temp
+        int irq = plic_claim();
+        if (irq == CONSOLE_IRQ) {
+            while (*((char*)CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
+                char c = *((char*)CONSOLE_RX_DATA);
+                inputBuffer->put(c);
+            }
+        }
+        plic_complete(irq);
     } else {
         // unexpected trap cause
     }
