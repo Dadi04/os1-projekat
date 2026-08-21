@@ -4,11 +4,14 @@
 #include "../h/_sem.hpp"
 #include "../h/SleepingQueue.hpp"
 #include "../h/BoundedBuffer.hpp"
+#include "../h/print.hpp"
 
 BoundedBuffer* inputBuffer = nullptr;
 BoundedBuffer* outputBuffer = nullptr;
 
 void RiscV::popSppSpie() {
+    RiscV::mc_sstatus(RiscV::SSTATUS_SPP);
+    RiscV::ms_sstatus(RiscV::SSTATUS_SPIE);
     __asm__ volatile ("csrw sepc, ra");
     __asm__ volatile ("sret");
 }
@@ -20,11 +23,11 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         uint64 volatile sepc = r_sepc() + 4;
         uint64 volatile sstatus = r_sstatus();
 
-        uint64 code = savedRegs[A0];     // a0
-        uint64 a1 = savedRegs[A1];       // a1
-        uint64 a2 = savedRegs[A2];       // a2
-        uint64 a3 = savedRegs[A3];       // a3
-        uint64 a4 = savedRegs[A4];       // a4
+        uint64 code = savedRegs[A0];
+        uint64 a1 = savedRegs[A1];
+        uint64 a2 = savedRegs[A2];
+        uint64 a3 = savedRegs[A3];
+        uint64 a4 = savedRegs[A4];
 
         switch (code) {
             case MEM_ALLOC:
@@ -140,6 +143,9 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         }
         plic_complete(irq);
     } else {
-        // unexpected trap cause
+        printString("User exception! SCAUSE: ");
+        printInt(scause);
+        printString("\n");
+        while (true) {}
     }
 }
