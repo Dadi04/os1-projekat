@@ -36,6 +36,11 @@ public:
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)
     static void popSppSpie();
 
+    enum BitMaskSie {
+        SIE_SSIE = (1 << 1),
+        SIE_SEIE = (1 << 9),
+    };
+
     // mask set register sie
     static void ms_sie(uint64 mask);
 
@@ -109,9 +114,9 @@ private:
 
 };
 
-inline void RiscV::ms_sie(uint64 mask) {
-    __asm__ volatile ("csrs sie, %[mask]" : : [mask] "r"(mask));
-}
+// inline void RiscV::ms_sie(uint64 mask) {
+//     __asm__ volatile ("csrs sie, %[mask]" : : [mask] "r"(mask));
+// }
 
 inline uint64 RiscV::r_scause() {
     uint64 volatile scause;

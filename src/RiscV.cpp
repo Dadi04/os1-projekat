@@ -17,8 +17,8 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
     uint64 scause = r_scause();
     if (scause == ECALL_USER || scause == ECALL_SUPERVISOR) {
         // interrupt no, cause code: environment call from U-mode and S-mode
-        uint64 sepc = r_sepc() + 4;
-        uint64 sstatus = r_sstatus();
+        uint64 volatile sepc = r_sepc() + 4;
+        uint64 volatile sstatus = r_sstatus();
 
         uint64 code = savedRegs[A0];     // a0
         uint64 a1 = savedRegs[A1];       // a1
@@ -122,8 +122,8 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         SleepingQueue::update();
         TCB::timeSliceCounter++;
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice()) {
-            uint64 sepc = r_sepc();
-            uint64 sstatus = r_sstatus();
+            uint64 volatile sepc = r_sepc();
+            uint64 volatile sstatus = r_sstatus();
             TCB::timeSliceCounter = 0;
             TCB::dispatch();
             w_sstatus(sstatus);

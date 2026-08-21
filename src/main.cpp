@@ -16,9 +16,8 @@ void main() {
     outputBuffer = new BoundedBuffer(256);
 
     RiscV::w_stvec((uint64)&RiscV::supervisorTrap);
-    
-    RiscV::ms_sie(1 << 9);
-    
+    // RiscV::ms_sie(RiscV::SIE_SSIE | RiscV::SIE_SEIE);
+
     RiscV::ms_sstatus(RiscV::SSTATUS_SIE);
 
     TCB* mainThread = TCB::createThread(nullptr, nullptr, nullptr);
