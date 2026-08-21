@@ -45,6 +45,8 @@ protected:
     virtual void periodicActivation() {} 
 private: 
     time_t period; 
+    
+    static void periodicLoop(void*);
 };
 
 class Console { 
