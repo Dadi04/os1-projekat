@@ -6,8 +6,8 @@
 
 extern void userMain();
 
-extern BoundedBuffer* inputBuffer = nullptr;
-extern BoundedBuffer* outputBuffer = nullptr;
+extern BoundedBuffer* inputBuffer;
+extern BoundedBuffer* outputBuffer;
 
 void main() {
     MemoryAllocator::init();
@@ -17,21 +17,12 @@ void main() {
 
     RiscV::w_stvec((uint64)&RiscV::supervisorTrap);
 
-    RiscV::ms_sstatus(RiscV::SSTATUS_SIE);
+    RiscV::unmask_interrupts();
 
     TCB* mainThread = TCB::createThread(nullptr, nullptr, nullptr);
     TCB::running = mainThread;
 
     size_t stackBlocks = (DEFAULT_STACK_SIZE + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE;
-
-    uint64* outputStack = (uint64*)MemoryAllocator::alloc(stackBlocks);
-    TCB::createKernelThread([](void*) {
-        while (true) {
-            char c = outputBuffer->get();
-            kputc(c);
-        }
-    }, nullptr, outputStack);
-
     uint64* idleStack = (uint64*)MemoryAllocator::alloc(stackBlocks);
     TCB::createThread([](void*) {
         while (true) {

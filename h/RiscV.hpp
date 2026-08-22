@@ -33,6 +33,10 @@ public:
         PUTC = 0x42
     };
 
+    static inline void mask_interrupts();
+
+    static inline void unmask_interrupts();
+
     // pop sstatus.spp and sstatus.spie bits (has to be a non inline function)
     static void popSppSpie();
 
@@ -113,6 +117,14 @@ private:
     static void handleSupervisorTrap(uint64 *savedRegs);
 
 };
+
+inline void RiscV::mask_interrupts() {
+    mc_sstatus(SSTATUS_SIE);
+}
+
+inline void RiscV::unmask_interrupts() {
+    ms_sstatus(SSTATUS_SIE);
+}
 
 inline void RiscV::ms_sie(uint64 mask) {
     __asm__ volatile ("csrs sie, %[mask]" : : [mask] "r"(mask));

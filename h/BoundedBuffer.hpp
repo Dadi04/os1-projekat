@@ -11,7 +11,8 @@ public:
     void put(char val);
     char get();
 
-    void putFromISR(char val);
+    bool putFromISR(char val);
+    bool getFromISR(char* val);
 
     int getCnt() const { return count; }
 

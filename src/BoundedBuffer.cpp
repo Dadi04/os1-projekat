@@ -24,14 +24,18 @@ void BoundedBuffer::put(char val) {
     itemAvailable->signal();
 }
 
-void BoundedBuffer::putFromISR(char val) {
-    if (count >= capacity) return;
+bool BoundedBuffer::putFromISR(char in) {
+    if (count >= capacity) {
+        return false;
+    }
 
-    buffer[tail] = val;
+    buffer[tail] = in;
     tail = (tail + 1) % capacity;
     count++;
 
     itemAvailable->signal();
+
+    return true;
 }
 
 char BoundedBuffer::get() {
@@ -44,4 +48,18 @@ char BoundedBuffer::get() {
     spaceAvailable->signal();
 
     return ret;
+}
+
+bool BoundedBuffer::getFromISR(char* out) {
+    if (count <= 0 || out == nullptr) {
+        return false;
+    } 
+
+    *out = buffer[head];
+    head = (head + 1) % capacity;
+    count--;
+
+    spaceAvailable->signal();
+    
+    return true;
 }

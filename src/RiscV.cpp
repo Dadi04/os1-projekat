@@ -16,6 +16,13 @@ void RiscV::popSppSpie() {
     __asm__ volatile ("sret");
 }
 
+static inline void flushConsoleTx() {
+    char out;
+    while ((*((char*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT) && outputBuffer->getFromISR(&out)) {
+        *((char*)CONSOLE_TX_DATA) = out;
+    }
+}
+
 void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
     uint64 scause = r_scause();
     if (scause == ECALL_USER || scause == ECALL_SUPERVISOR) {
@@ -111,6 +118,7 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
             case PUTC: {
                 char c = (char)a1;
                 outputBuffer->put(c);
+                flushConsoleTx();
                 savedRegs[A0] = 0;
                 break;
             }
@@ -136,9 +144,10 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         int irq = plic_claim();
         if (irq == CONSOLE_IRQ) {
             while (*((char*)CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
-                char c = *((char*)CONSOLE_RX_DATA);
-                inputBuffer->putFromISR(c);
+                char in = *((char*)CONSOLE_RX_DATA);
+                inputBuffer->putFromISR(in);
             }
+            flushConsoleTx();
         }
         plic_complete(irq);
     } else {

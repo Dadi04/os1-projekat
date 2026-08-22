@@ -11,7 +11,6 @@ public:
 
     using Body = void (*)(void*);
     static TCB* createThread(Body body, void *arg, uint64* stackSpace);
-    static TCB* createKernelThread(Body body, void *arg, uint64* stackSpace);
 
     static void yield();
 
@@ -43,8 +42,7 @@ private:
             }), 
             timeSlice(timeSlice),
             finished(false),
-            sleepTime(0),
-            isKernel(false) {
+            sleepTime(0) {
         if (body != nullptr) Scheduler::put(this);
     }
     struct Context {
@@ -59,7 +57,6 @@ private:
     uint64 timeSlice;
     bool finished;
     time_t sleepTime;
-    bool isKernel;
 
     friend class RiscV;
 
