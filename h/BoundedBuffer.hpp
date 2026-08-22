@@ -11,6 +11,8 @@ public:
     void put(char val);
     char get();
 
+    void putFromISR(char val);
+
     int getCnt() const { return count; }
 
     void* operator new(size_t size) { return MemoryAllocator::alloc(size); }
@@ -22,7 +24,6 @@ private:
 
     _sem* itemAvailable;
     _sem* spaceAvailable;
-    _sem* mutex;
 };
 
 #endif

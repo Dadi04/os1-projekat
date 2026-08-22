@@ -56,7 +56,6 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
                 TCB::dispatch();
                 break;
             case THREAD_DISPATCH:
-                TCB::timeSliceCounter = 0;
                 TCB::dispatch();
                 break;
             case SEM_OPEN: {
@@ -100,6 +99,8 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
                     SleepingQueue::put(TCB::running, time);
                     TCB::block();
                     savedRegs[A0] = 0;
+                } else {
+                    savedRegs[A0] = (uint64)-1;
                 }
                 break;
             }
@@ -109,8 +110,7 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
             }
             case PUTC: {
                 char c = (char)a1;
-                while (!(*((char*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT)) {}
-                *((char*)CONSOLE_TX_DATA) = c;
+                outputBuffer->put(c);
                 savedRegs[A0] = 0;
                 break;
             }
@@ -127,7 +127,6 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         if (TCB::timeSliceCounter >= TCB::running->getTimeSlice()) {
             uint64 volatile sepc = r_sepc();
             uint64 volatile sstatus = r_sstatus();
-            TCB::timeSliceCounter = 0;
             TCB::dispatch();
             w_sstatus(sstatus);
             w_sepc(sepc);
@@ -138,14 +137,14 @@ void RiscV::handleSupervisorTrap(uint64 *savedRegs) {
         if (irq == CONSOLE_IRQ) {
             while (*((char*)CONSOLE_STATUS) & CONSOLE_RX_STATUS_BIT) {
                 char c = *((char*)CONSOLE_RX_DATA);
-                inputBuffer->put(c);
+                inputBuffer->putFromISR(c);
             }
         }
         plic_complete(irq);
     } else {
-        printString("User exception! SCAUSE: ");
-        printInt(scause);
-        printString("\n");
+        kprintString("User exception! SCAUSE: ");
+        kprintInt(scause);
+        kprintString("\n");
         while (true) {}
     }
 }

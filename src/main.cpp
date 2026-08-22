@@ -2,12 +2,12 @@
 #include "../h/TCB.hpp"
 #include "../h/MemoryAllocator.hpp"
 #include "../h/BoundedBuffer.hpp"
-#include "../h/syscall_c.h"
+#include "../h/print.hpp"
 
 extern void userMain();
 
-extern BoundedBuffer* inputBuffer;
-extern BoundedBuffer* outputBuffer;
+extern BoundedBuffer* inputBuffer = nullptr;
+extern BoundedBuffer* outputBuffer = nullptr;
 
 void main() {
     MemoryAllocator::init();
@@ -16,12 +16,28 @@ void main() {
     outputBuffer = new BoundedBuffer(256);
 
     RiscV::w_stvec((uint64)&RiscV::supervisorTrap);
-    // RiscV::ms_sie(RiscV::SIE_SSIE | RiscV::SIE_SEIE);
 
     RiscV::ms_sstatus(RiscV::SSTATUS_SIE);
 
     TCB* mainThread = TCB::createThread(nullptr, nullptr, nullptr);
     TCB::running = mainThread;
+
+    size_t stackBlocks = (DEFAULT_STACK_SIZE + MEM_BLOCK_SIZE - 1) / MEM_BLOCK_SIZE;
+
+    uint64* outputStack = (uint64*)MemoryAllocator::alloc(stackBlocks);
+    TCB::createKernelThread([](void*) {
+        while (true) {
+            char c = outputBuffer->get();
+            kputc(c);
+        }
+    }, nullptr, outputStack);
+
+    uint64* idleStack = (uint64*)MemoryAllocator::alloc(stackBlocks);
+    TCB::createThread([](void*) {
+        while (true) {
+            thread_dispatch();
+        }
+    }, nullptr, idleStack);
 
     thread_t userThread;
     thread_create(&userThread, [](void*) {
@@ -29,6 +45,10 @@ void main() {
     }, nullptr);
 
     while (!((TCB*)userThread)->isFinished()) {
+        thread_dispatch();
+    }
+
+    while (outputBuffer->getCnt() > 0) {
         thread_dispatch();
     }
 }

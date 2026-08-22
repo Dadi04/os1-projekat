@@ -7,11 +7,11 @@
 extern "C" {
 #endif
 
-void printString(const char *str);
+void kputc(char c);
 
-void printInt(long long num, int base = 10);
+void kprintString(const char *str);
 
-void printHex(unsigned long long num);
+void kprintInt(uint64 num);
 
 #ifdef __cplusplus
 }

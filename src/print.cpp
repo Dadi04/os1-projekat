@@ -1,48 +1,34 @@
 #include "../h/print.hpp"
+#include "../lib/hw.h"
 
-void printString(const char *str) {
+void kputc(char c) {
+    while (!(*((char*)CONSOLE_STATUS) & CONSOLE_TX_STATUS_BIT)) {}
+    *((char*)CONSOLE_TX_DATA) = c;
+}
+
+void kprintString(const char *str) {
     if (!str) return;
     while (*str) {
-        putc(*str);
+        kputc(*str);
         str++;
     }
 }
 
-void printInt(long long num, int base) {
-    if (base < 2 || base > 16) return;
-
+void kprintInt(uint64 num) {
     if (num == 0) {
-        putc('0');
+        kputc('0');
         return;
     }
 
     char buf[64];
     int i = 0;
-    bool isNegative = false;
 
-    if (num < 0 && base == 10) {
-        isNegative = true;
-        num = -num;
-    }
-
-    unsigned long long n = (unsigned long long)num;
-    static const char digits[] = "0123456789ABCDEF";
-
-    while (n > 0) {
-        buf[i++] = digits[n % base];
-        n /= base;
-    }
-
-    if (isNegative) {
-        buf[i++] = '-';
+    while (num > 0) {
+        buf[i++] = '0' + (num % 10);
+        num /= 10;
     }
 
     while (--i >= 0) {
-        putc(buf[i]);
+        kputc(buf[i]);
     }
-}
-
-void printHex(unsigned long long num) {
-    printString("0x");
-    printInt((long long)num, 16);
 }

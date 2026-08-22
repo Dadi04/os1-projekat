@@ -114,9 +114,9 @@ private:
 
 };
 
-// inline void RiscV::ms_sie(uint64 mask) {
-//     __asm__ volatile ("csrs sie, %[mask]" : : [mask] "r"(mask));
-// }
+inline void RiscV::ms_sie(uint64 mask) {
+    __asm__ volatile ("csrs sie, %[mask]" : : [mask] "r"(mask));
+}
 
 inline uint64 RiscV::r_scause() {
     uint64 volatile scause;
@@ -148,15 +148,15 @@ inline void RiscV::w_stvec(uint64 stvec) {
     __asm__ volatile ("csrw stvec, %[stvec]" : : [stvec] "r"(stvec));
 }
 
-// inline uint64 RiscV::r_stval() {
-//     uint64 volatile stval;
-//     __asm__ volatile ("csrr %[stval], stval" : [stval] "=r"(stval));
-//     return stval;
-// }
+inline uint64 RiscV::r_stval() {
+    uint64 volatile stval;
+    __asm__ volatile ("csrr %[stval], stval" : [stval] "=r"(stval));
+    return stval;
+}
 
-// inline void RiscV::w_stval(uint64 stval) {
-//     __asm__ volatile ("csrw stval, %[stval]" : : [stval] "r"(stval));
-// }
+inline void RiscV::w_stval(uint64 stval) {
+    __asm__ volatile ("csrw stval, %[stval]" : : [stval] "r"(stval));
+}
 
 inline void RiscV::ms_sip(uint64 mask) {
     __asm__ volatile ("csrs sip, %[mask]" : : [mask] "r"(mask));
