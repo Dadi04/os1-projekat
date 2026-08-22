@@ -11,15 +11,15 @@ public:
 private:
     struct Elem {
         TCB* thread;
+        time_t timeLeft;
         Elem* next;
-        Elem(TCB* thread, Elem* next = nullptr) : thread(thread), next(next) {}
+        Elem(TCB* thread, time_t timeLeft, Elem* next = nullptr) : thread(thread), timeLeft(timeLeft), next(next) {}
 
         void* operator new(size_t size) { return MemoryAllocator::alloc(size); }
         void operator delete(void* ptr) { MemoryAllocator::free(ptr); }
     };
 
     static Elem* head;
-    static Elem* tail;
 };
 
 #endif

@@ -2,47 +2,41 @@
 #include "../h/Scheduler.hpp"
 
 SleepingQueue::Elem* SleepingQueue::head = nullptr;
-SleepingQueue::Elem* SleepingQueue::tail = nullptr;
 
 void SleepingQueue::put(TCB* thread, time_t time) {
     if (thread == nullptr || time == 0) return;
 
-    thread->setSleepTime(time);
+    Elem* prev = nullptr;
+    Elem* curr = head;
 
-    Elem* elem = new Elem(thread);
-    if (head == nullptr) {
-        head = tail = elem;
+    while (curr != nullptr && time >= curr->timeLeft) {
+        time -= curr->timeLeft;
+        prev = curr;
+        curr = curr->next;
+    }
+
+    Elem* elem = new Elem(thread, time, curr);
+
+    if (curr != nullptr) {
+        curr->timeLeft -= time;
+    }
+
+    if (prev == nullptr) {
+        head = elem;
     } else {
-        tail->next = elem;
-        tail = elem;
+        prev->next = elem;
     }
 } 
 
 void SleepingQueue::update() {
-    Elem* curr = head;
-    Elem* prev = nullptr;
+    if (head == nullptr) return;
 
-    while (curr != nullptr) {
-        curr->thread->decSleepTime();
+    head->timeLeft--;
 
-        if (curr->thread->getSleepTime() == 0) {
-            Scheduler::put(curr->thread);
-
-            Elem* old = curr;
-            if (prev == nullptr) {
-                head = curr->next;
-            } else {
-                prev->next = curr->next;
-            }
-
-            if (old == tail) {
-                tail = prev;
-            }
-            curr = curr->next;
-            delete old;
-        } else {
-            prev = curr;
-            curr = curr->next;
-        }
+    while (head != nullptr && head->timeLeft == 0) {
+        Elem* old = head;
+        head = head->next;
+        Scheduler::put(old->thread);
+        delete old;
     }
 } 
